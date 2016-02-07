@@ -17,8 +17,8 @@
     based music emotion classification methodology. Four Layer-1 HMMs
     classify 25~ms music clips while one layer-2 HMM judges emotion from 10~s music clips.
     In this way the emotion is determined by both short-term information
-    (tones) and long-term information (melodies). The experiments show that
-    our model.
+    (melodies) and long-term information (development). The experiments show that
+    our model achieves a 65\% accuracy on a test set containing 396 music clips.
 
   \end{abstract}
 
@@ -32,7 +32,7 @@
   (pop, fork, classic, etc.) is usually not enough, as songs that share a genre may
   convey different emotions. As a result, music emotion classification has
   received much attention. Yang proposed fuzzy approach to the problem. They
-  implemented two fuzzy classifiers to measure the strength of the emotion.
+  implemented two fuzzy classifiers to measure the strength of the emotion
   \cite{yang2006music}. Multi-modal classification which takes lyrics into
   consideration was studied in a following research \cite{yang2008toward}.
 
@@ -56,7 +56,7 @@
   properties, which is discarded by all the works listed above as they cut
   the music into small clips first. Thus, in this paper, we proposed a
   two-layer Hidden Markov Models based music emotion classification method. We
-  first implemented four layer-1 HMMs to classify 10-second music clips. They
+  first implement four layer-1 HMMs to classify 10-second music clips. They
   take 25~ms music clips as input, and output the probabilities for each
   emotion category. A layer-2 HMM is then used to judge the emotion from the
   probability vectors. In this way we can utilize both local and global emotion
@@ -90,7 +90,7 @@
   In order to utilize both short-term and long-term information, we design a
   two-layer structure. Layer-1 contains four HMMs, corresponding to four types
   of emotions. Each HMM is trained using the music clips (10~s) of the
-  corresponding type, and output the probability that the clip belongs to that
+  corresponding type, and outputs the probability that the clip belongs to that
   type. The probabilities are then taken to the layer-2 HMM, which is trained
   by complete songs. After given the information of the whole song, the
   layer-2 HMM will make the final decision and judge each clip's emotion type.
@@ -99,12 +99,14 @@
   \begin{figure}[htbp]
     \centering
     \includegraphics[width=\columnwidth]{structure.png}
-    \caption{Structure of our model. Layer-1 works on short-term (25ms)Features while layer-2 works on long-term (10s) features.}
+    \caption{Structure of our model. Layer-1 works on short-term (25~ms)
+    Features while layer-2 works on long-term (10~s) features. The melody icon
+    is created by B Barrett from Noun Project.}
     \label{fig:structure}
   \end{figure}
 
-  For layer-1 HMMs, 25ms MFCCs are used as emissions. For layer-2 HMM, the
-  10s probabilities vectors (4-dimension) are used as emissions. Each layer-1
+  For layer-1 HMMs, 25~ms MFCCs are used as emissions. For layer-2 HMM, the
+  10~s probabilities vectors (4-dimension) are used as emissions. Each layer-1
   HMM and layer-2 HMM has four hidden states. In layer-1, the meaning of the
   states is not clear while in layer-2, each state represents a type of
   emotion.
@@ -115,26 +117,26 @@
   \subsection{Music selection}
 
   We first select 44 songs from soundtracks of two animes and a movie. The
-  song list is carefully selected so that each song has exactly one emotion.
-  These songs are used to train layer-1 HMMs. Then 15 songs from the same
+  song list is carefully selected so that each song has exactly one type of emotion.
+  These songs are used to train layer-1 HMMs. Then 15 songs (396 10-second-clip) from the same
   albums have been selected to train layer-2 HMMs. These songs have more
-  complex structures, each song contains more than one emotions.
+  complex structures, each song contains more than one types of emotion.
 
   \subsection{Pre-processing}
   Before processing, each song is converted into 44100Hz, mono channel format.
 
-  For the layer-1 train set, songs are divided into no-overlapping 10 second
+  For the layer-1 train set, songs are divided into non-overlapping 10 second
   clips, while for the layer-2 train set, clips are 50\%-overlapping. This is
-  because each song in layer-1 train set has only one emotion, so the
-  overlapping will not utilize more information. On the other hand,
+  because each song in layer-1 train set is mono-emotion, so the
+  overlapping will not utilize more information, and will cause over-fitting instead. On the other hand,
   songs in layer-2 train set have long-term information. So overlapping is
   needed or some information will be missing if the an emotion transaction
-  happens on the edge of a clip. The division of the train sets is shown in
+  happens on an edge of a clip. The division of the train sets is shown in
   Figure~\ref{fig:trainset_division}.
 
   \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.6\columnwidth]{trainset_division.png}
+    \includegraphics[width=0.5\columnwidth]{trainset_division.png}
     \caption{Trainset division for layer-1 and layer-2.}
     \label{fig:trainset_division}
   \end{figure}
@@ -151,9 +153,7 @@
   MATLAB offers a HMM implementation, but it can only handle discrete
   emissions, which is not our case. Thus we use Murphy's Hidden markov model
   toolbox for MATLAB for HMMs training \cite{murphy1998hidden}. Gaussian
-  outputs models are used in our implementation.
-
-  For layer-1 HMMs, hidden state number is chosen to four according to
+  outputs models are used in our implementation. For layer-1 HMMs, hidden state number is chosen to four according to
   \cite{chai2001folk}.
 
   The source code of our implementation is available at
@@ -163,6 +163,16 @@
   \section{Result}
   \label{sec:Result}
 
+  Our framework consists of two major layers. To verify our model, we first
+  check the output of layer-1 to ensure that layer-1 works as expected. After
+  trained the layer-1, we input the train set again and record the
+  probability vectors generating by the four HMMs. The corresponding points
+  are then plotted on the emotion plane. As is shown in
+  Figure~\ref{fig:trainset}, most music clips are classified correctly. Note
+  that here the input is the train set, so the accuracy should be better than the real
+  classification accuracy. However, here we just want to show
+  the layer-1 training is effectively done, so the experiment is enough.
+
   \begin{figure}[htbp]
     \centering
     \includegraphics[width=\columnwidth]{trainset.pdf}
@@ -170,13 +180,61 @@
     \label{fig:trainset}
   \end{figure}
 
+  The experiment result for layer-2 output is shown in
+  Table~\ref{tab:accuracy}.
+
+  \begin{table}
+    \caption{Accuracy of layer-1 output and layer-2 output.}
+    \label{tab:accuracy}
+    \centering
+    \begin{tabular}{c|cc}
+      No. & Layer-1 out & Layer-2 out \\
+      \hline
+      1   &  33\%   &  52\% \\
+      2   &  60\%   &  60\% \\
+      3   &  48\%   &  56\% \\
+      4   &  25\%   &  29\% \\
+      5   &  71\%   &  79\% \\
+      6   &  65\%   & 100\% \\
+      7   &  32\%   &  52\% \\
+      8   &  52\%   &  67\% \\
+      9   &  65\%   &  77\% \\
+      10  &  48\%   &  45\% \\
+      11  & 100\%   & 100\% \\
+      12  &  50\%   &  83\% \\
+      13  &  32\%   &  32\% \\
+      14  &  38\%   &  76\% \\
+      15  &  81\%   &  69\% \\
+      \hline
+      avg. & 53\%  & 65\% \\
+    \end{tabular}
+  \end{table}
 
   \section{Conclusion}
   \label{sec:Conclusion}
 
+  In this paper, we proposed a two-layer HMM based music emotion classification
+  method. The result shows that the first-layer alone gives a 53\% accuracy,
+  while the two-layer structure achieves 65\% accuracy on the test set. It
+  shows that HMM is a practical way to classify musics according to their
+  emotions. Moreover, the two-layer structure we proposed can indeed make use
+  of long-term information and increase the accuracy compared to a simply
+  one-layer approach.
+
   \section{Discussion}
   \label{sec:Discussion}
 
+  The dataset of our experiments are small (59 songs) due to the complexity
+  of manually labeling. Thus the HMMs in two layers may not be completely
+  trained, leading to low accuracies. Moreover, the labeling job is done
+  by an EE student who is not familiar with music (A.K.A., me). An expert
+  labeled music dataset might be a better solution, and may lead to a better
+  result.
+
+  Also, the power of Thayer's emotion plane has not been fully used. For
+  example, some music clips do not have a clear emotion, which may cause some
+  classification problems. This might be solved by adding a new category ``Unknown'', which lies near the origin of the emotion plane. However, further
+  investigation is needed.
 
   \bibliographystyle{IEEEtran}
   \bibliography{refs}
